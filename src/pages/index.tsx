@@ -7,7 +7,7 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Typography from "@mui/material/Typography";
 //import Box from "@mui/material/Box";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
 import SearchIcon from "@mui/icons-material/Search";
@@ -15,6 +15,7 @@ import FlightTakeoffIcon from "@mui/icons-material/FlightTakeoff";
 import FlightLandIcon from "@mui/icons-material/FlightLand";
 import dynamic from "next/dynamic";
 import dayjs, { Dayjs } from "dayjs";
+import axios from "axios";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -56,14 +57,12 @@ export default function Home() {
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+  const [airports, setAirports] = useState<any>([]);
   const DynamicAutocomplete = dynamic(
     () => import("@mui/material/Autocomplete"),
     { ssr: false }
   );
   const DynamicBox = dynamic(() => import("@mui/material/Box"), { ssr: false });
-
-  const options = ["Option 1", "Option 2", "Option 3"];
-  const [values, setValues] = React.useState<Dayjs | null>(dayjs("2022-04-17"));
 
   const destination = [
     {
@@ -103,6 +102,28 @@ export default function Home() {
       amount: 41000,
     },
   ];
+
+  async function getAllAirports() {
+    try {
+      const res = await axios.get(
+        "https://airlabs.co/api/v9/airports?api_key=51ced4f1-4f9a-46f6-a405-081ec8c79cc3"
+      );
+      const getAirports = res.data.response.map((item: any) => item);
+
+      setAirports(getAirports);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return {
+        props: {
+          data: "Error fetching data",
+        },
+      };
+    }
+  }
+  useEffect(() => {
+    getAllAirports();
+  }, []);
+
   return (
     <>
       <Head>
@@ -197,7 +218,15 @@ export default function Home() {
               <CustomTabPanel value={value} index={0}>
                 <DynamicAutocomplete
                   sx={{ marginBottom: "10px" }}
-                  options={options}
+                  options={airports}
+                  getOptionLabel={(option: any) =>
+                    option.name +
+                    " (" +
+                    option.iata_code +
+                    ", " +
+                    option.country_code +
+                    ")"
+                  }
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -213,9 +242,27 @@ export default function Home() {
                       }}
                     />
                   )}
+                  renderOption={(props: any, option: any) => (
+                    <li {...props}>
+                      <span>{option.name}</span>
+                      <span style={{ marginLeft: "10px", color: "gray" }}>
+                        ({option.iata_code}, {option.country_code})
+                      </span>
+                    </li>
+                  )}
                 />
+
                 <DynamicAutocomplete
-                  options={options}
+                  sx={{ marginBottom: "10px" }}
+                  options={airports}
+                  getOptionLabel={(option: any) =>
+                    option.name +
+                    " (" +
+                    option.iata_code +
+                    ", " +
+                    option.country_code +
+                    ")"
+                  }
                   renderInput={(params) => (
                     <TextField
                       {...params}
@@ -231,6 +278,14 @@ export default function Home() {
                       }}
                     />
                   )}
+                  renderOption={(props: any, option: any) => (
+                    <li {...props}>
+                      <span>{option.name}</span>
+                      <span style={{ marginLeft: "10px", color: "gray" }}>
+                        ({option.iata_code}, {option.country_code})
+                      </span>
+                    </li>
+                  )}
                 />
                 <div className="flight-wrapper">
                   <button className="show-flight">Show flights</button>
@@ -238,58 +293,53 @@ export default function Home() {
               </CustomTabPanel>
               <CustomTabPanel value={value} index={1}>
                 <div className="d-flex tab-two">
-                <div className="search-bar">
-                
-                <input
-                  type="text"
-                  placeholder="Booking Reference"
-                  className="bg-trans"
-                  value=""
-                />{" "}
-              </div>
-              <div className="search-bar">
-                
-                <input
-                  type="text"
-                  placeholder="Last Name"
-                  className="bg-tran"
-                  value=""
-                />{" "}
-              </div>
+                  <div className="search-bar">
+                    <input
+                      type="text"
+                      placeholder="Booking Reference"
+                      className="bg-trans"
+                      value=""
+                    />{" "}
+                  </div>
+                  <div className="search-bar">
+                    <input
+                      type="text"
+                      placeholder="Last Name"
+                      className="bg-tran"
+                      value=""
+                    />{" "}
+                  </div>
                 </div>
-            
-              <br />
-              <div className="retrieve-btn-wrapper"> 
-              <button className="btn-retrieve">Retrieve Booking</button>
-              </div>
-            
+
+                <br />
+                <div className="retrieve-btn-wrapper">
+                  <button className="btn-retrieve">Retrieve Booking</button>
+                </div>
               </CustomTabPanel>
               <CustomTabPanel value={value} index={2}>
-              <div className="d-flex tab-two">
-                <div className="search-bar">
-                
-                <input
-                  type="text"
-                  placeholder="QR flight Number"
-                  className="bg-trans"
-                  value=""
-                />{" "}
-              </div>
-              <div className="search-bar">
-                
-                <input
-                  type="text"
-                  placeholder="Plane Number"
-                  className="bg-tran"
-                  value=""
-                />{" "}
-              </div>
+                <div className="d-flex tab-two">
+                  <div className="search-bar">
+                    <input
+                      type="text"
+                      placeholder="QR flight Number"
+                      className="bg-trans"
+                      value=""
+                    />{" "}
+                  </div>
+                  <div className="search-bar">
+                    <input
+                      type="text"
+                      placeholder="Plane Number"
+                      className="bg-tran"
+                      value=""
+                    />{" "}
+                  </div>
                 </div>
-            
-              <br />
-              <div className="retrieve-btn-wrapper"> 
-              <button className="btn-retrieve">Search</button>
-              </div>
+
+                <br />
+                <div className="retrieve-btn-wrapper">
+                  <button className="btn-retrieve">Search</button>
+                </div>
               </CustomTabPanel>
             </DynamicBox>
           </div>
@@ -387,7 +437,7 @@ export default function Home() {
                   <button className="btn-basic learn-more">learn more</button>
                 </div>
                 <img
-                  src="/images/illustration.svg"
+                  src="/images/illustration.png"
                   width="260"
                   className="mt-5"
                 />
@@ -422,7 +472,7 @@ export default function Home() {
             </div>
             <div className="carousel-item">
               <img
-                className="d-block w-100 h-"
+                className="d-block w-100 "
                 src="/images/waiting.jpg"
                 alt="Second slide"
               />
@@ -493,9 +543,21 @@ export default function Home() {
         <div className="footer">
           <div className="container">
             <div className="row">
-              <div className="col foot">Explore</div>
-              <div className="col foot">Bookings</div>
-              <div className="col foot">Ticket</div>
+              <div className="col foot">
+                <a className="nav-link" href="#">
+                  Explore
+                </a>
+              </div>
+              <div className="col foot">
+                <a className="nav-link" href="#">
+                  Bookings
+                </a>
+              </div>
+              <div className="col foot">
+                <a className="nav-link" href="#">
+                  Ticket
+                </a>
+              </div>
             </div>
           </div>
         </div>
