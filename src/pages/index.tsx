@@ -359,12 +359,12 @@ export default function Home() {
               </p>
               <button className="book">Discover More</button>
             </div>
-            <div className="col-sm-6 col-md 6 col-12 gy-4">
+            <div className="col-sm-6 col-md  col-12 gy-4">
               <div className="container">
                 <div className="row">
                   {destination.map((data) => (
                     <div
-                      className="image-card  col-6 col-md-6"
+                      className="image-card  col-lg-4 col-6 col-md-6"
                       key={data.country}
                     >
                       <img
